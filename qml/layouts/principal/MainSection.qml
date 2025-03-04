@@ -1,0 +1,329 @@
+import QtQuick 
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+
+Rectangle{
+    anchors.fill:parent
+    color : "#0d0a1b"
+    Rectangle {
+        id: _blur
+        anchors.fill: parent
+        color: "#0d0a1b"
+        visible :false
+        // First Circle
+        Rectangle {
+            id: circle
+            width: 80
+            height: 80
+            color: "#FF3E64"
+            opacity : 0.3
+            radius: width / 2
+            // Pulse Animation
+            SequentialAnimation on scale {
+                loops: Animation.Infinite
+                NumberAnimation { to: 4.3; duration: 2000; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 4.0; duration: 2000; easing.type: Easing.InOutQuad }
+            }
+
+            SequentialAnimation on x {
+                loops: Animation.Infinite
+                NumberAnimation { to: 150; duration: 6000; easing.type: Easing.Linear }
+                NumberAnimation { to: 280; duration: 4000; easing.type: Easing.Linear }
+                NumberAnimation { to: 380; duration: 3000; easing.type: Easing.Linear }
+            }
+
+            SequentialAnimation on y {
+                loops: Animation.Infinite
+                NumberAnimation { to: 250; duration: 5000; easing.type: Easing.Linear }
+                NumberAnimation { to: 100; duration: 4000; easing.type: Easing.Linear }
+                NumberAnimation { to: 30; duration: 3000; easing.type: Easing.Linear }
+            }
+        }
+
+        // Second Circle
+        Rectangle {
+            id: circle1
+            width: 100
+            height: 100
+            color: "#452ec6"
+            opacity : 0.5
+            radius: width / 2
+            // Pulse Animation
+            SequentialAnimation on scale {
+                loops: Animation.Infinite
+                NumberAnimation { to: 3.3; duration: 2000; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 2.8; duration: 2000; easing.type: Easing.InOutQuad }
+            }
+            SequentialAnimation on x {
+                loops: Animation.Infinite
+                NumberAnimation { to: 430; duration: 5000; easing.type: Easing.Linear }
+                NumberAnimation { to: 380; duration: 4000; easing.type: Easing.Linear }
+                NumberAnimation { to: 150; duration: 4000; easing.type: Easing.Linear }
+            }
+            SequentialAnimation on y {
+                loops: Animation.Infinite
+                NumberAnimation { to: 150; duration: 5000; easing.type: Easing.Linear }
+                NumberAnimation { to: 200; duration: 4000; easing.type: Easing.Linear }
+                NumberAnimation { to: 330; duration: 4000; easing.type: Easing.Linear }
+            }
+            onScaleChanged :{
+                blurel.source = null
+                blurel.source = liveSource
+            }
+        }
+    }
+    ShaderEffectSource {
+        id: liveSource
+        sourceItem: _blur
+        anchors.fill: _blur
+        live: true // Ensures real-time updates with animations
+    }
+    FastBlur {
+        id: blurel
+        anchors.fill: liveSource
+        source: liveSource
+        radius: 140
+    }
+
+    Item{
+        id : leftSide 
+        width: 250
+        anchors{
+            top : parent.top
+            left:parent.left 
+            bottom :parent.bottom
+        }
+    }
+
+    Item{
+        id : main
+        anchors{
+            left :  leftSide.right
+            bottom:parent.bottom
+            right : parent.right
+            top : parent.top
+        }
+
+        ColumnLayout{
+            anchors.fill :  parent
+            spacing : 0
+            Item{
+                id : header 
+                Layout.preferredWidth : parent.width 
+                Layout.preferredHeight : 120
+
+                SearchBar{
+                    id: searchfield
+                    inputfocus : false
+                }
+
+            }
+            Item{
+                id : hotSongsSlider
+                Layout.topMargin :  8
+                Layout.preferredWidth : parent.width 
+                Layout.preferredHeight : 300
+
+                ColumnLayout{
+                    width : parent.width * 0.8
+                    height : parent.height
+                    anchors.horizontalCenter : parent.horizontalCenter
+                    spacing : 7
+                    Item{
+                        Layout.preferredHeight : 30
+                        Layout.preferredWidth : parent.width
+
+                        TextIcon{
+                            txt: "Best Songs"
+                            size : 18
+                            path : "../../../res/icons/burn.png"
+                            iconSize : 25 
+                        }
+ 
+                    }
+                    Item{
+                        Layout.fillHeight : true
+                        Layout.preferredWidth : parent.width
+                        FloatingSlider{
+                            elms : ListModel{
+                                ListElement{
+                                    img : "../../../res/images/cover1.jpg"
+                                    artist : "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                    isfav : true
+                                    songName : "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover2.jpg"
+                                    artist : "Ed Sheeran"
+                                    isfav : false
+                                    songName : "Shape of You"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover4.jpg"
+                                    artist : "Adele"
+                                    isfav : true
+                                    songName : "Hello"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover5.jpg"
+                                    artist : "Bruno Mars"
+                                    isfav : false
+                                    songName : "Uptown Funk"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover6.jpg"
+                                    artist : "Beyoncé"
+                                    isfav : true
+                                    songName : "Halo"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/defaultCover.jpg"
+                                    artist : "Unknown Artist"
+                                    isfav : false
+                                    songName : "Unknown Song"
+                                }
+                            } 
+                        }
+                    }
+                } 
+
+            }
+            Item{
+                id : songsGrid
+                Layout.preferredWidth : parent.width 
+                Layout.fillHeight : true
+                Layout.topMargin : 60
+                ColumnLayout{
+                    width : parent.width * 0.8
+                    height : parent.height
+                    anchors.horizontalCenter : parent.horizontalCenter
+                    spacing : 13
+                    Item{
+                        Layout.preferredHeight : 30
+                        Layout.preferredWidth : parent.width
+
+                        TextIcon{
+                            txt: "From your Album"
+                            size : 18
+                            path : "../../../res/icons/music-album.png"
+                            iconSize : 25 
+                        }
+ 
+                    }
+                    Item{
+                        Layout.fillHeight : true
+                        Layout.preferredWidth : parent.width
+                        clip : true
+                        GridView{
+                            anchors.fill : parent
+                            cellWidth : width / 2
+                            cellHeight :  85
+                            model : ListModel{
+                                ListElement{
+                                    img : "../../../res/images/cover1.jpg"
+                                    artist : "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                    isfav : true
+                                    songName : "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover2.jpg"
+                                    artist : "Ed Sheeran"
+                                    isfav : false
+                                    songName : "Shape of You"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover4.jpg"
+                                    artist : "Adele"
+                                    isfav : true
+                                    songName : "Hello"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover5.jpg"
+                                    artist : "Bruno Mars"
+                                    isfav : false
+                                    songName : "Uptown Funk"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover6.jpg"
+                                    artist : "Beyoncé"
+                                    isfav : true
+                                    songName : "Halo"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/defaultCover.jpg"
+                                    artist : "Unknown Artist"
+                                    isfav : false
+                                    songName : "Unknown Song"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover1.jpg"
+                                    artist : "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                    isfav : true
+                                    songName : "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover2.jpg"
+                                    artist : "Ed Sheeran"
+                                    isfav : false
+                                    songName : "Shape of You"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover4.jpg"
+                                    artist : "Adele"
+                                    isfav : true
+                                    songName : "Hello"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover5.jpg"
+                                    artist : "Bruno Mars"
+                                    isfav : false
+                                    songName : "Uptown Funk"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/cover6.jpg"
+                                    artist : "Beyoncé"
+                                    isfav : true
+                                    songName : "Halo"
+                                }
+                                ListElement{
+                                    img : "../../../res/images/defaultCover.jpg"
+                                    artist : "Unknown Artist"
+                                    isfav : false
+                                    songName : "Unknown Song"
+                                }
+                            } 
+                            delegate : songsElement
+                        }
+
+                        Component {
+                            id : songsElement
+                            Rectangle{
+                                id : elm
+                                required property int  index
+                                required property string img 
+                                required property string artist
+                                required property string songName  
+
+                                width : parent.width /  2 - 10
+                                height : 70
+                                radius  : 10
+                                
+                                SongElement{
+                                    _width : parent.width
+                                    _height : parent.height
+                                    img :elm.img 
+                                    artist : elm.artist 
+                                    songName : elm.songName
+                                } 
+
+                            }
+                        }
+
+                    }
+                } 
+            }
+        }
+       
+    }
+
+}
