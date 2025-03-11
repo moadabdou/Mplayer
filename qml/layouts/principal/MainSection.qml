@@ -3,6 +3,9 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
 Rectangle{
+
+    
+
     anchors.fill:parent
     color : "#0d0a1b"
     Rectangle {
@@ -110,7 +113,7 @@ Rectangle{
             Item{
                 id : header 
                 Layout.preferredWidth : parent.width 
-                Layout.preferredHeight : 120
+                Layout.preferredHeight : 80
 
                 SearchBar{
                     id: searchfield
@@ -122,7 +125,7 @@ Rectangle{
                 id : hotSongsSlider
                 Layout.topMargin :  8
                 Layout.preferredWidth : parent.width 
-                Layout.preferredHeight : 300
+                Layout.preferredHeight : 270
 
                 ColumnLayout{
                     width : parent.width * 0.8
@@ -203,7 +206,7 @@ Rectangle{
                         Layout.preferredWidth : parent.width
 
                         TextIcon{
-                            txt: "From your Album"
+                            txt: "all songs"
                             size : 18
                             path : "../../../res/icons/music-album.png"
                             iconSize : 25 
@@ -215,94 +218,24 @@ Rectangle{
                         Layout.preferredWidth : parent.width
                         clip : true
                         GridView{
+                            id : musicgrid
                             anchors.fill : parent
                             cellWidth : width / 2
                             cellHeight :  85
-                            model : ListModel{
-                                ListElement{
-                                    img : "../../../res/images/cover1.jpg"
-                                    artist : "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                    isfav : true
-                                    songName : "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover2.jpg"
-                                    artist : "Ed Sheeran"
-                                    isfav : false
-                                    songName : "Shape of You"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover4.jpg"
-                                    artist : "Adele"
-                                    isfav : true
-                                    songName : "Hello"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover5.jpg"
-                                    artist : "Bruno Mars"
-                                    isfav : false
-                                    songName : "Uptown Funk"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover6.jpg"
-                                    artist : "Beyoncé"
-                                    isfav : true
-                                    songName : "Halo"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/defaultCover.jpg"
-                                    artist : "Unknown Artist"
-                                    isfav : false
-                                    songName : "Unknown Song"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover1.jpg"
-                                    artist : "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                    isfav : true
-                                    songName : "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover2.jpg"
-                                    artist : "Ed Sheeran"
-                                    isfav : false
-                                    songName : "Shape of You"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover4.jpg"
-                                    artist : "Adele"
-                                    isfav : true
-                                    songName : "Hello"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover5.jpg"
-                                    artist : "Bruno Mars"
-                                    isfav : false
-                                    songName : "Uptown Funk"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover6.jpg"
-                                    artist : "Beyoncé"
-                                    isfav : true
-                                    songName : "Halo"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/defaultCover.jpg"
-                                    artist : "Unknown Artist"
-                                    isfav : false
-                                    songName : "Unknown Song"
-                                }
-                            } 
+                            model : MediaScanner 
                             delegate : songsElement
+                            Component.onCompleted : MediaScanner.scanFolder("C:/Users/dell/Downloads")
                         }
+
 
                         Component {
                             id : songsElement
                             Rectangle{
                                 id : elm
                                 required property int  index
-                                required property string img 
+                                required property string coverImage 
                                 required property string artist
-                                required property string songName  
+                                required property string title
 
                                 width : parent.width /  2 - 10
                                 height : 70
@@ -311,9 +244,9 @@ Rectangle{
                                 SongElement{
                                     _width : parent.width
                                     _height : parent.height
-                                    img :elm.img 
+                                    img :elm.coverImage 
                                     artist : elm.artist 
-                                    songName : elm.songName
+                                    songName : elm.title
                                 } 
 
                             }

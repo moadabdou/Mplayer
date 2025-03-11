@@ -3,9 +3,12 @@ cmake_minimum_required(VERSION 3.16)
 project(Mplayer VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
 
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+
+find_package(Taglib REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Quick Core)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -14,6 +17,9 @@ qt_policy(SET QTP0004 NEW)
 qt_add_executable(appMplayer
     main.cpp
 )
+
+
+target_include_directories(appMplayer  PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 qt_add_qml_module(appMplayer
     URI Mplayer
@@ -66,6 +72,8 @@ qt_add_qml_module(appMplayer
         res/images/cover6.jpg
         res/images/defaultCover.jpg
         res/images/wavesong.png
+    SOURCES 
+        include/media/MediaScanner.h src/backend/media/MediaScanner.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -80,8 +88,9 @@ set_target_properties(appMplayer PROPERTIES
 )
 
 target_link_libraries(appMplayer
-    PRIVATE Qt6::Quick
-)
+    PRIVATE Qt6::Quick Qt6::Core tag
+)  
+
 
 include(GNUInstallDirs)
 install(TARGETS appMplayer

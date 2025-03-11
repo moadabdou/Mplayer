@@ -5,7 +5,7 @@ import QtQuick.Layouts
 Item {
     required property Item inner
     id: root
-    height: 80
+    height: 60
     ShaderEffectSource {
         id: effectSource
         anchors.fill: parent
@@ -60,7 +60,7 @@ Item {
         preventStealing: true  // Prevents flicking from being stolen by ListView
         onWheel: (event) => event.accepted = true  // Block scroll events
         onExited:{
-            parent.anchors.bottomMargin = -80
+            parent.anchors.bottomMargin = -60
         }
     }
 
@@ -75,7 +75,7 @@ Item {
                 spacing : 20
                 Item{
                     Layout.preferredHeight: parent.height
-                    Layout.preferredWidth : 50
+                    Layout.preferredWidth : 40
                     
                     RadiusImage{
                         img :  "../../../res/images/cover1.jpg"
@@ -88,7 +88,7 @@ Item {
 
                 Item{
                     Layout.preferredHeight: parent.height
-                    Layout.preferredWidth : 80
+                    Layout.preferredWidth : 60
                     
                     Column{
                         spacing :  4
@@ -136,8 +136,8 @@ Item {
                     }
                 }
                 Rectangle{
-                    Layout.preferredWidth : 55
-                    Layout.preferredHeight : 55
+                    Layout.preferredWidth : 45
+                    Layout.preferredHeight : 45
                     radius : Layout.preferredWidth / 2
                     color: "#EF4369"
                     NormalIcon{

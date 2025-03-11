@@ -17,7 +17,7 @@ Item {
                 Layout.minimumWidth : 900
                 Layout.preferredHeight : parent.height
                 MainSection{}
-            }
+            } 
             Item{
                 Layout.minimumWidth :  400
                 Layout.maximumWidth : 400
@@ -31,7 +31,7 @@ Item {
     MouseArea {
         id: screenEdgeDetector
         width: parent.width
-        height: 60
+        height: 30
         anchors.bottom: parent.bottom
         hoverEnabled: true
 
@@ -45,7 +45,7 @@ Item {
         anchors.bottom : parent.bottom
         width : parent.width
         inner :  innerContent  
-        anchors.bottomMargin :  -80
+        anchors.bottomMargin :  -60
         Behavior on anchors.bottomMargin{
             NumberAnimation{
                 duration : 300
