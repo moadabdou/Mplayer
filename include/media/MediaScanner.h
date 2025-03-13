@@ -5,14 +5,8 @@
 #include <QString>
 #include <QPixmap>
 #include <vector>
+#include "shared/types/song.h"
 
-struct Song {
-    QString filePath;
-    QString title;
-    QString artist;
-    QString album;
-    QString coverImage;  // Path to the cover image
-};
 
 class MediaScanner : public QAbstractListModel {
     Q_OBJECT
@@ -26,7 +20,8 @@ public:
         TitleRole,
         ArtistRole,
         AlbumRole,
-        CoverImageRole
+        CoverImageRole,
+        IsFav
     };
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const ;

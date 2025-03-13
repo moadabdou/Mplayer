@@ -1,21 +1,9 @@
-#include "media/MediaScanner.h" 
-#include <QDir> 
-#include <QDebug>
 #include <filesystem>
-#include <taglib/fileref.h>
-#include <taglib/fileref.h>
-#include <taglib/tag.h>
-#include <taglib/mpegfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/attachedpictureframe.h>
-
+#include "media/MediaScanner.h" 
+#include "db/update_db.h"
+#include "db/fetch_db.h"
 
 namespace fs = std::filesystem;
-
-
-QString imageToBase64(const QByteArray& imageData) {
-    return "data:image/jpeg;base64," + imageData.toBase64();
-}
 
 
 MediaScanner::MediaScanner(QObject* parent) : QAbstractListModel(parent) {}
@@ -35,6 +23,7 @@ QVariant MediaScanner::data(const QModelIndex& index, int role) const {
         case ArtistRole: return song.artist;
         case AlbumRole: return song.album;
         case CoverImageRole: return song.coverImage;
+        case IsFav : return song.isFav;
     }
     return QVariant();
 }
@@ -45,7 +34,8 @@ QHash<int, QByteArray> MediaScanner::roleNames() const {
         { TitleRole, "title" },
         { ArtistRole, "artist" },
         { AlbumRole, "album" },
-        { CoverImageRole, "coverImage" }
+        { CoverImageRole, "coverImage" },
+        { IsFav , "isFav" }
     };
 }
 
@@ -53,42 +43,11 @@ void MediaScanner::scanFolder(const QString& folderPath) {
     beginResetModel();
     songs.clear();
 
-    QDir directory(folderPath);
-    QStringList filters = { "*.mp3"};
-    QStringList fileList = directory.entryList(filters, QDir::Files);
-
-    for (const QString& file : fileList) {
-        QString filePath = folderPath + "/" + file;
-
-        // Open file with TagLib
-        TagLib::FileRef f(filePath.toStdString().c_str());
-        QString title = file;
-        QString artist = "Unknown Artist";
-        QString album = "Unknown Album";
-        QString coverImage = "../../../res/images/defaultCover.jpg";
-
-        if (!f.isNull() && f.tag()) {
-            TagLib::Tag* tag = f.tag();
-            artist = !tag->artist().isEmpty()? QString::fromStdString(tag->artist().to8Bit(true)):artist;
-            album =  !tag->artist().isEmpty()? QString::fromStdString(tag->album().to8Bit(true)):album;
-            TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File*>(f.file());
-            std::vector<TagLib::ByteVector> pictures;
-            if (mpegFile && mpegFile->ID3v2Tag()) {
-                TagLib::ID3v2::FrameList frameList = mpegFile->ID3v2Tag()->frameList("APIC");
-                if (!frameList.isEmpty()) {
-                    auto *pic = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frameList.front());
-                    pictures.push_back(pic->picture());
-                }
-            }
-            if (!pictures.empty()) {
-                TagLib::ByteVector coverArt = pictures[0];
-                QByteArray imageData(coverArt.data(), coverArt.size());
-                coverImage = imageToBase64(imageData);
-            }
-        }
-
-
-        songs.push_back({ filePath, title, artist, album,coverImage }); 
+    updateDatabase(folderPath);
+    std::fstream logdb(std::filesystem::current_path().string() + "/logs/dbtransactions_fetch.log", std::ios::out);
+    fectchSongs(songs, logdb, "1 LIMIT 10");
+    for(const auto& el :  songs){
+        //logdb << "img : " << el.coverImage.toStdString() << "\n";
     }
 
     endResetModel();

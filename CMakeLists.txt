@@ -8,6 +8,7 @@ set(CMAKE_AUTOMOC ON)
 
 
 find_package(Taglib REQUIRED)
+find_package(SQLite3 REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Quick Core)
 
 qt_standard_project_setup(REQUIRES 6.5)
@@ -74,6 +75,9 @@ qt_add_qml_module(appMplayer
         res/images/wavesong.png
     SOURCES 
         include/media/MediaScanner.h src/backend/media/MediaScanner.cpp
+        include/db/update_db.h src/backend/db/update_db.cpp
+        include/db/fetch_db.h src/backend/db/fetch_db.cpp
+        include/shared/types/song.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -88,7 +92,7 @@ set_target_properties(appMplayer PROPERTIES
 )
 
 target_link_libraries(appMplayer
-    PRIVATE Qt6::Quick Qt6::Core tag
+    PRIVATE Qt6::Quick Qt6::Core tag  SQLite::SQLite3
 )  
 
 
