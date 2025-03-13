@@ -1,45 +1,88 @@
-import QtQuick 
+pragma ComponentBehavior: Bound
+import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
-Rectangle{
+Rectangle {
+    id: root
+    required property string currentCategory
 
-    
+    onCurrentCategoryChanged : {
+        if (currentCategory == "Favorites"){
+            MediaScanner.scanFolders(" is_fav = 1 ORDER BY title", false) ;
+        }else if(currentCategory == "Songs"){
+            MediaScanner.scanFolders(" 1 ORDER BY title", false); 
+        }else if(currentCategory == "New"){
+            MediaScanner.scanFolders(" is_old=0 ORDER BY title", false); 
+        }
+    }
 
-    anchors.fill:parent
-    color : "#0d0a1b"
+    anchors.fill: parent
+    color: "#0d0a1b"
     Rectangle {
         id: _blur
         anchors.fill: parent
         color: "#0d0a1b"
-        visible :false
+        visible: false
         // First Circle
         Rectangle {
             id: circle
             width: 80
             height: 80
             color: "#FF3E64"
-            opacity : 0.3
+            opacity: 0.3
             radius: width / 2
             // Pulse Animation
             SequentialAnimation on scale {
                 loops: Animation.Infinite
-                NumberAnimation { to: 4.3; duration: 2000; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: 4.0; duration: 2000; easing.type: Easing.InOutQuad }
+                NumberAnimation {
+                    to: 4.3
+                    duration: 2000
+                    easing.type: Easing.InOutQuad
+                }
+                NumberAnimation {
+                    to: 4.0
+                    duration: 2000
+                    easing.type: Easing.InOutQuad
+                }
             }
 
             SequentialAnimation on x {
                 loops: Animation.Infinite
-                NumberAnimation { to: 150; duration: 6000; easing.type: Easing.Linear }
-                NumberAnimation { to: 280; duration: 4000; easing.type: Easing.Linear }
-                NumberAnimation { to: 380; duration: 3000; easing.type: Easing.Linear }
+                NumberAnimation {
+                    to: 150
+                    duration: 6000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 280
+                    duration: 4000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 380
+                    duration: 3000
+                    easing.type: Easing.Linear
+                }
             }
 
             SequentialAnimation on y {
                 loops: Animation.Infinite
-                NumberAnimation { to: 250; duration: 5000; easing.type: Easing.Linear }
-                NumberAnimation { to: 100; duration: 4000; easing.type: Easing.Linear }
-                NumberAnimation { to: 30; duration: 3000; easing.type: Easing.Linear }
+                NumberAnimation {
+                    to: 250
+                    duration: 5000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 100
+                    duration: 4000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 30
+                    duration: 3000
+                    easing.type: Easing.Linear
+                }
             }
         }
 
@@ -49,29 +92,61 @@ Rectangle{
             width: 100
             height: 100
             color: "#452ec6"
-            opacity : 0.5
+            opacity: 0.5
             radius: width / 2
             // Pulse Animation
             SequentialAnimation on scale {
                 loops: Animation.Infinite
-                NumberAnimation { to: 3.3; duration: 2000; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: 2.8; duration: 2000; easing.type: Easing.InOutQuad }
+                NumberAnimation {
+                    to: 3.3
+                    duration: 2000
+                    easing.type: Easing.InOutQuad
+                }
+                NumberAnimation {
+                    to: 2.8
+                    duration: 2000
+                    easing.type: Easing.InOutQuad
+                }
             }
             SequentialAnimation on x {
                 loops: Animation.Infinite
-                NumberAnimation { to: 430; duration: 5000; easing.type: Easing.Linear }
-                NumberAnimation { to: 380; duration: 4000; easing.type: Easing.Linear }
-                NumberAnimation { to: 150; duration: 4000; easing.type: Easing.Linear }
+                NumberAnimation {
+                    to: 430
+                    duration: 5000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 380
+                    duration: 4000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 150
+                    duration: 4000
+                    easing.type: Easing.Linear
+                }
             }
             SequentialAnimation on y {
                 loops: Animation.Infinite
-                NumberAnimation { to: 150; duration: 5000; easing.type: Easing.Linear }
-                NumberAnimation { to: 200; duration: 4000; easing.type: Easing.Linear }
-                NumberAnimation { to: 330; duration: 4000; easing.type: Easing.Linear }
+                NumberAnimation {
+                    to: 150
+                    duration: 5000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 200
+                    duration: 4000
+                    easing.type: Easing.Linear
+                }
+                NumberAnimation {
+                    to: 330
+                    duration: 4000
+                    easing.type: Easing.Linear
+                }
             }
-            onScaleChanged :{
-                blurel.source = null
-                blurel.source = liveSource
+            onScaleChanged: {
+                blurel.source = null;
+                blurel.source = liveSource;
             }
         }
     }
@@ -88,175 +163,244 @@ Rectangle{
         radius: 140
     }
 
-    Item{
-        id : leftSide 
+    Item {
+        id: leftSide
         width: 250
-        anchors{
-            top : parent.top
-            left:parent.left 
-            bottom :parent.bottom
+        anchors {
+            top: parent.top
+            left: parent.left
+            bottom: parent.bottom
         }
     }
 
-    Item{
-        id : main
-        anchors{
-            left :  leftSide.right
-            bottom:parent.bottom
-            right : parent.right
-            top : parent.top
+    Item {
+        id: main
+        anchors {
+            left: leftSide.right
+            bottom: parent.bottom
+            right: parent.right
+            top: parent.top
         }
 
-        ColumnLayout{
-            anchors.fill :  parent
-            spacing : 0
-            Item{
-                id : header 
-                Layout.preferredWidth : parent.width 
-                Layout.preferredHeight : 80
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 0
+            Item {
+                id: header
+                Layout.preferredWidth: parent.width
+                Layout.preferredHeight: 80
 
-                SearchBar{
+                SearchBar {
                     id: searchfield
-                    inputfocus : false
+                    inputfocus: false
                 }
-
             }
-            Item{
-                id : hotSongsSlider
-                Layout.topMargin :  8
-                Layout.preferredWidth : parent.width 
-                Layout.preferredHeight : 270
+            Item {
+                id: hotSongsSlider
+                Layout.topMargin: 8
+                Layout.preferredWidth: parent.width
+                Layout.preferredHeight: 270
 
-                ColumnLayout{
-                    width : parent.width * 0.8
-                    height : parent.height
-                    anchors.horizontalCenter : parent.horizontalCenter
-                    spacing : 7
-                    Item{
-                        Layout.preferredHeight : 30
-                        Layout.preferredWidth : parent.width
+                ColumnLayout {
+                    width: parent.width * 0.8
+                    height: parent.height
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 7
+                    Item {
+                        Layout.preferredHeight: 30
+                        Layout.preferredWidth: parent.width
 
-                        TextIcon{
+                        TextIcon {
                             txt: "Best Songs"
-                            size : 18
-                            path : "../../../res/icons/burn.png"
-                            iconSize : 25 
-                        }
- 
-                    }
-                    Item{
-                        Layout.fillHeight : true
-                        Layout.preferredWidth : parent.width
-                        FloatingSlider{
-                            elms : ListModel{
-                                ListElement{
-                                    img : "../../../res/images/cover1.jpg"
-                                    artist : "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                    isfav : true
-                                    songName : "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover2.jpg"
-                                    artist : "Ed Sheeran"
-                                    isfav : false
-                                    songName : "Shape of You"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover4.jpg"
-                                    artist : "Adele"
-                                    isfav : true
-                                    songName : "Hello"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover5.jpg"
-                                    artist : "Bruno Mars"
-                                    isfav : false
-                                    songName : "Uptown Funk"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/cover6.jpg"
-                                    artist : "Beyoncé"
-                                    isfav : true
-                                    songName : "Halo"
-                                }
-                                ListElement{
-                                    img : "../../../res/images/defaultCover.jpg"
-                                    artist : "Unknown Artist"
-                                    isfav : false
-                                    songName : "Unknown Song"
-                                }
-                            } 
+                            size: 18
+                            path: "../../../res/icons/burn.png"
+                            iconSize: 25
                         }
                     }
-                } 
-
+                    Item {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: parent.width
+                        FloatingSlider {
+                            elms: ListModel {
+                                ListElement {
+                                    img: "../../../res/images/cover1.jpg"
+                                    artist: "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                    isfav: true
+                                    songName: "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
+                                }
+                                ListElement {
+                                    img: "../../../res/images/cover2.jpg"
+                                    artist: "Ed Sheeran"
+                                    isfav: false
+                                    songName: "Shape of You"
+                                }
+                                ListElement {
+                                    img: "../../../res/images/cover4.jpg"
+                                    artist: "Adele"
+                                    isfav: true
+                                    songName: "Hello"
+                                }
+                                ListElement {
+                                    img: "../../../res/images/cover5.jpg"
+                                    artist: "Bruno Mars"
+                                    isfav: false
+                                    songName: "Uptown Funk"
+                                }
+                                ListElement {
+                                    img: "../../../res/images/cover6.jpg"
+                                    artist: "Beyoncé"
+                                    isfav: true
+                                    songName: "Halo"
+                                }
+                                ListElement {
+                                    img: "../../../res/images/defaultCover.jpg"
+                                    artist: "Unknown Artist"
+                                    isfav: false
+                                    songName: "Unknown Song"
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            Item{
-                id : songsGrid
-                Layout.preferredWidth : parent.width 
-                Layout.fillHeight : true
-                Layout.topMargin : 60
-                ColumnLayout{
-                    width : parent.width * 0.8
-                    height : parent.height
-                    anchors.horizontalCenter : parent.horizontalCenter
-                    spacing : 13
-                    Item{
-                        Layout.preferredHeight : 30
-                        Layout.preferredWidth : parent.width
+            Item {
+                id: songsGrid
+                Layout.preferredWidth: parent.width
+                Layout.fillHeight: true
+                Layout.topMargin: 60
+                ColumnLayout {
+                    width: parent.width * 0.8
+                    height: parent.height
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 13
+                    Item {
+                        Layout.preferredHeight: 30
+                        Layout.preferredWidth: parent.width
 
-                        TextIcon{
-                            txt: "all songs"
-                            size : 18
-                            path : "../../../res/icons/music-album.png"
-                            iconSize : 25 
+                        TextIcon {
+                            txt: root.currentCategory
+                            size: 18
+                            path: "../../../res/icons/music-album.png"
+                            iconSize: 25
                         }
- 
                     }
-                    Item{
-                        Layout.fillHeight : true
-                        Layout.preferredWidth : parent.width
-                        clip : true
-                        GridView{
-                            id : musicgrid
-                            anchors.fill : parent
-                            cellWidth : width / 2
-                            cellHeight :  85
-                            model : MediaScanner 
-                            delegate : songsElement
-                            Component.onCompleted : MediaScanner.scanFolder("C:/Users/dell/Downloads")
-                        }
-
-
-                        Component {
-                            id : songsElement
-                            Rectangle{
-                                id : elm
-                                required property int  index
-                                required property string coverImage 
-                                required property string artist
-                                required property string title
-
-                                width : parent.width /  2 - 10
-                                height : 70
-                                radius  : 10
-                                
-                                SongElement{
-                                    _width : parent.width
-                                    _height : parent.height
-                                    img :elm.coverImage 
-                                    artist : elm.artist 
-                                    songName : elm.title
-                                } 
-
+                    Item {
+                        Layout.preferredHeight: ["Songs", "Favorites", "New"].find(c => root.currentCategory == c) ? 0 : 40
+                        Layout.preferredWidth: parent.width
+                        Behavior on Layout.preferredHeight {
+                            NumberAnimation {
+                                duration: 200
                             }
                         }
 
+                        ListView {
+                            property string currentCategoryItem 
+
+                            id: categoryList
+                            width: parent.width
+                            height: parent.height * .9
+                            anchors.verticalCenter: parent.verticalCenter
+                            orientation: ListView.Horizontal
+                            spacing: 10
+                            clip: true  // Prevents overflow
+
+                            model: SongDB.fetchCategoryItems(root.currentCategory)
+                            
+                            currentCategoryItem: model.length > 0 ? model[0] : ""
+                            onModelChanged: currentCategoryItem = model.length > 0 ? model[0] : ""
+
+                            delegate: Item {
+                                id: categoryElm
+                                required property int index
+                                required property string modelData
+                                width: children[0].width
+                                height: parent.height
+                                Rectangle {
+                                    id: categoryRect
+                                    width: children[0].implicitWidth + 20
+                                    height: parent.height
+                                    radius: 10  // Rounded corners
+                                    color: categoryList.currentIndex == categoryElm.index ? "#ca0091" : "#30003b"
+
+                                    // Add hover behavior
+                                    Behavior on color {
+                                        ColorAnimation {
+                                            duration: 150
+                                        }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: categoryElm.modelData
+                                        font.pixelSize: 17
+                                        color: "white"
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            categoryList.currentIndex = categoryElm.index;
+                                            categoryList.currentCategoryItem = categoryElm.modelData;
+                                        }
+                                    }
+                                }
+                            }
+
+                            onCurrentCategoryItemChanged : {
+                                if (root.currentCategory == "Albums"){
+                                    MediaScanner.scanFolders(" album = '"+ currentCategoryItem.replace(/'/g, "''") +"' ORDER BY title", false)
+                                }else if (root.currentCategory == "Artists") {
+                                    MediaScanner.scanFolders(" artist = '"+ currentCategoryItem.replace(/'/g, "''") +"' ORDER BY title", false)
+                                }else if (root.currentCategory == "Folders"){
+                                    MediaScanner.scanFolders(" path LIKE '"+ currentCategoryItem.replace(/'/g, "''") +"%' ORDER BY title", false)
+                                }
+                            }
+
+                        }
                     }
-                } 
+                    Item {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: parent.width
+                        clip: true
+                        GridView {
+                            id: musicgrid
+                            anchors.fill: parent
+                            cellWidth: width / 2
+                            cellHeight: 85
+                            model: MediaScanner
+                            delegate: songsElement
+                            Component.onCompleted: MediaScanner.scanFolders()
+                        }
+                        Component {
+                            id: songsElement
+                            Rectangle {
+                                id: elm
+                                required property int index
+                                required property string filePath
+                                required property string coverImage
+                                required property string artist
+                                required property string title
+                                required property bool isFav
+
+                                width: parent.width / 2 - 10
+                                height: 70
+                                radius: 10
+
+                                SongElement {
+                                    _width: parent.width
+                                    _height: parent.height
+                                    img: elm.coverImage
+                                    artist: elm.artist
+                                    songName: elm.title
+                                    isFav: elm.isFav
+                                    filePath: elm.filePath
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-       
     }
-
 }

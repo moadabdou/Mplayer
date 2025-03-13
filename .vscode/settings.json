@@ -71,6 +71,7 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "qstring": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "filesystem": "cpp"
     }
 }

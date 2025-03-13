@@ -5,6 +5,7 @@ import Mplayer 1.0
 Item {
     id : app
     anchors.fill: parent
+    property string currentCategory : "Songs";
 
     Item{
         anchors.fill : parent
@@ -16,7 +17,9 @@ Item {
                 Layout.fillWidth : true
                 Layout.minimumWidth : 900
                 Layout.preferredHeight : parent.height
-                MainSection{}
+                MainSection{
+                    currentCategory : app.currentCategory
+                }
             } 
             Item{
                 Layout.minimumWidth :  400
@@ -26,7 +29,11 @@ Item {
             }
         }
 
-        SideBar{}
+        SideBar{
+            onCategoryChanged : category=>{
+                app.currentCategory = category
+            } 
+        }
     }
     MouseArea {
         id: screenEdgeDetector

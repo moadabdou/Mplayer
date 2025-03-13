@@ -39,13 +39,15 @@ QHash<int, QByteArray> MediaScanner::roleNames() const {
     };
 }
 
-void MediaScanner::scanFolder(const QString& folderPath) {
+void MediaScanner::scanFolders(const QString& query, bool update ) {
     beginResetModel();
     songs.clear();
+    if (update){
+        updateDatabase("C:/Users/dell/Downloads"); //to do dynamic look up 
+    }
 
-    updateDatabase(folderPath);
     std::fstream logdb(std::filesystem::current_path().string() + "/logs/dbtransactions_fetch.log", std::ios::out);
-    fectchSongs(songs, logdb, "1 LIMIT 10");
+    fectchSongs(songs, logdb, query);
     for(const auto& el :  songs){
         //logdb << "img : " << el.coverImage.toStdString() << "\n";
     }

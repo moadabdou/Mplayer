@@ -8,8 +8,10 @@ Rectangle{
     required property real _width
     required property real _height
     required property string img
+    required property string filePath
     required property string songName 
     required property string artist
+    required property bool isFav
 
     width : _width 
     height : _height 
@@ -89,7 +91,7 @@ Rectangle{
                             anchors.fill : parent
                             radius: 4
                         }
-                        width : 150
+                        width : 180
                         MenuItem {  
                             text: "play"
                             contentItem: Text {
@@ -101,13 +103,16 @@ Rectangle{
                                 color: parent.highlighted ? "#EF4369" : "transparent" // Highlight color
                                 radius: 4
                             } 
-                            MouseArea{
-                                anchors.fill : parent 
-                                cursorShape : Qt.PointingHandCursor
+                            Loader {
+                                anchors.fill: parent
+                                sourceComponent: MouseArea {
+                                    cursorShape: Qt.PointingHandCursor
+                                    acceptedButtons: Qt.NoButton
+                                }
                             }
                         }
                         MenuItem { 
-                            text: "add to favorite"
+                            text: root.isFav ? "remove from favorite" : "add to favorite"
                             contentItem: Text {
                                 text: parent.text
                                 color :  "white" 
@@ -117,9 +122,17 @@ Rectangle{
                                 color: parent.highlighted ? "#EF4369" : "transparent" // Highlight color
                                 radius: 4
                             } 
-                            MouseArea{
-                                anchors.fill : parent 
-                                cursorShape : Qt.PointingHandCursor
+                            onTriggered: ()=>{
+                                root.isFav = !root.isFav
+                                SongDB.editSong(root.filePath, "is_fav = "+ (root.isFav ? "1" : "0") )
+                            }
+
+                            Loader {
+                                anchors.fill: parent
+                                sourceComponent: MouseArea {
+                                    cursorShape: Qt.PointingHandCursor
+                                    acceptedButtons: Qt.NoButton
+                                }
                             }
                         }
                         MenuItem { 
@@ -133,9 +146,12 @@ Rectangle{
                                 color: parent.highlighted ? "#EF4369" : "transparent" // Highlight color
                                 radius: 4
                             } 
-                            MouseArea{
-                                anchors.fill : parent 
-                                cursorShape : Qt.PointingHandCursor
+                            Loader {
+                                anchors.fill: parent
+                                sourceComponent: MouseArea {
+                                    cursorShape: Qt.PointingHandCursor
+                                    acceptedButtons: Qt.NoButton
+                                }
                             }
                         }
                     }

@@ -7,6 +7,10 @@ Item{
     id : root
     height : parent.height
     width : 210
+
+    // Signal emitted when the category changes
+    signal categoryChanged(string category);
+
     ColumnLayout{
         width : parent.width
         spacing : 0
@@ -162,11 +166,19 @@ Item{
                                     icon : "../../../res/icons/audiowave.png"
                                 }
                                 ListElement{
-                                    txt : "favorite"
+                                    txt : "Favorites"
                                     icon : "../../../res/icons/heart.png"
                                 }
                                 ListElement{
                                     txt : "Albums"
+                                    icon : "../../../res/icons/music-album.png"
+                                }
+                                ListElement{
+                                    txt : "Artists"
+                                    icon : "../../../res/icons/person.png"
+                                }
+                                ListElement{
+                                    txt : "Folders"
                                     icon : "../../../res/icons/music-album.png"
                                 }
                                 ListElement{
@@ -226,6 +238,7 @@ Item{
                                         listGenres.currentIndex = elm.index
                                         listNetwork.currentIndex = -1
                                         sideBarController.Layout.preferredHeight = pos.y + 25
+                                        root.categoryChanged(elm.txt)
                                     }
                                 }
 

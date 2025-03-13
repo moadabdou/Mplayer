@@ -28,7 +28,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const ;
     QHash<int, QByteArray> roleNames() const ;
 
-    Q_INVOKABLE void scanFolder(const QString& folderPath);  // Scan music folder
+    Q_INVOKABLE void scanFolders(const QString& query = "1", bool update = true);  // Scan music folder
 
 private:
     std::vector<Song> songs;

@@ -77,6 +77,7 @@ qt_add_qml_module(appMplayer
         include/media/MediaScanner.h src/backend/media/MediaScanner.cpp
         include/db/update_db.h src/backend/db/update_db.cpp
         include/db/fetch_db.h src/backend/db/fetch_db.cpp
+        include/db/Song_db.h src/backend/db/Song_db.cpp
         include/shared/types/song.h
 )
 
