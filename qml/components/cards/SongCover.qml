@@ -5,23 +5,35 @@ import Mplayer 1.0
 
 Rectangle{
     id : root
-    property string img 
-    property bool isfav
-    property string artist
-    property string songName 
+    required property string filePath
+    required property string coverImage
+    required property string artist
+    required property string album
+    required property string duration
+    required property string title
+    required property bool isFav 
     
     anchors.fill : parent
     clip : true
     color : "transparent"
     radius : .13 * parent.height
+
+    MouseArea{
+        anchors.fill :  parent
+        cursorShape : Qt.PointingHandCursor
+        onClicked:()=>{
+            QueuePlaying.playSong(root.filePath , root.title , root.artist, root.album , root.duration, root.coverImage, root.isFav)
+        }
+    }
     
     RadiusImage{
         id : songCover
-        img : root.img
+        img : root.coverImage
         _width : parent.width 
         _height : parent.height  
         _radius : .13 * parent.height
     }
+
 
     
     Item {
@@ -76,7 +88,7 @@ Rectangle{
                 Layout.preferredWidth :parent.width*.9
                 Layout.preferredHeight : children[0].implicitHeight
                 Text{
-                    text : root.songName
+                    text : root.title
                     font.pixelSize : 22
                     width : parent.width
                     elide : Text.ElideRight
@@ -107,7 +119,15 @@ Rectangle{
             height : 40
             FavIcon{
                 size :  parent.height
-                isfav : root.isfav
+                isfav : root.isFav
+                MouseArea{
+                    anchors.fill :  parent
+                    cursorShape : Qt.PointingHandCursor
+                    onClicked:()=>{
+                        root.isFav = !root.isFav
+                        SongDatabase.editSong(root.filePath, "is_fav = "+ (root.isFav ? "1" : "0") )
+                    }
+                }
             }
         }
 

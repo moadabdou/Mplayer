@@ -1,5 +1,4 @@
-#include <QMediaPlayer>
-#include <QAudioOutput>
+#include <QAudioDevice>
 #include <QDebug>
 #include "media/PlayController.h"
 
@@ -13,18 +12,24 @@ QString formatTime(size_t total_seconds){
                 .arg(seconds, 2, 10, QChar('0'));
 }
 
-PlayController::PlayController(MediaScanner *ScannedSongs, QueuePlaying *QueuedSongs, QObject *parent)
+PlayController::PlayController(MediaScanner *ScannedSongs, QueuePlaying *QueuedSongs, SongDatabase* songDB, QObject *parent)
     :scannedSongs(ScannedSongs)
     ,queuedSongs(QueuedSongs)
+    ,songDB(songDB)
     ,songPath("")
     ,player(new QMediaPlayer)
     ,audioOutput(new QAudioOutput)
+    ,devices(new QMediaDevices)
+    ,m_repeatMode(0)
+    ,m_volume(50)
     ,QObject(parent){
-    
+    setVolume(m_volume);
     player->setAudioOutput(audioOutput);
     connect(&timer, &QTimer::timeout, this, &PlayController::updatePosition);
+    connect(devices, &QMediaDevices::audioOutputsChanged, this, &PlayController::handleAudioOutputsChanged);
     connect(player, &QMediaPlayer::playbackStateChanged, this, &PlayController::onPlaybackStateChanged);
     connect(player, &QMediaPlayer::mediaStatusChanged, this, &PlayController::onMediaStatusChanged);
+    
     timer.start(1000);
 }
 
@@ -36,10 +41,38 @@ void PlayController::onPlaybackStateChanged(QMediaPlayer::PlaybackState state) {
     }
 }
 
+
+void PlayController::handleAudioOutputsChanged(){
+    audioOutput->setDevice( QMediaDevices::defaultAudioOutput());
+}
+
 void PlayController::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
     if (status == QMediaPlayer::EndOfMedia) {
-        if (!queuedSongs->next()){
-            pause();
+
+        songDB->editSong(songPath, " play_count = play_count + 1 ");
+
+        if (repeatMode() == RepeatMode::NOREPEAT){
+            if (!queuedSongs->next()){
+                pause();
+            }
+        }else if (repeatMode() == RepeatMode::REPEAT){
+            if (!queuedSongs->next()){
+                queuedSongs->reset();
+            }
+        }else if (repeatMode() == RepeatMode::REPEATCURR){
+            seek(0);
+            play();
+        }else if (repeatMode() == RepeatMode::SHUFFLE){
+            Song song = scannedSongs->getRandomSong();
+            queuedSongs->playSong(
+                song.filePath,
+                song.title,
+                song.artist,
+                song.album,
+                song.duration,
+                song.coverImage,
+                song.isFav
+            );
         }
     }
 }
@@ -50,7 +83,9 @@ void PlayController::updatePosition(){
 }
 
 void PlayController::next() const{
-    queuedSongs->next();
+    if(!queuedSongs->next() && repeatMode() == RepeatMode::REPEAT){
+        queuedSongs->reset();
+    }
 }
 void PlayController::prev() const{
     queuedSongs->prev();
@@ -133,6 +168,7 @@ void PlayController::setSongPosition(qreal position){
 
 void PlayController::setVolume(int volume){
     m_volume = volume;
+    audioOutput->setVolume(volume/100.0);
     emit volumeChanged();
 }
 void PlayController::setRepeatMode(int repeatMode){
@@ -149,15 +185,27 @@ void PlayController::setIsShown(bool isShown){
 }
 
 void PlayController::newSongToPlay(){
+
+
+    if (songPosition() >= 0.9 || player->position() >= 60000){
+        songDB->editSong(songPath, " play_count = play_count + 1 ");
+    }
+
+
     SongData song = queuedSongs->getCurrentSong();
     songPath = song.filePath;
+
+    songDB->editSong(songPath, " recent_play = strftime('%s', 'now') "); //update recent play for the new song
     player->setSource(QUrl::fromLocalFile(songPath));
-    audioOutput->setVolume(0.8);
+
     setSongTitle(song.title);
     setSongArtist(song.artist);
     setSongCover(song.coverImage);
     setSongDuration(song.duration);
+
     setSongPassedDuration("0:00");
+    setSongPosition(0); //not realy neccerry since position get updated directly from the Audio, but this  make it a bit faster to reset to need to  wait the audio  to load
     setIsShown(true);
+
     play();
 }

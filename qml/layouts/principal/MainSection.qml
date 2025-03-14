@@ -14,6 +14,11 @@ Rectangle {
             MediaScanner.scanFolders(" 1 ORDER BY title", false); 
         }else if(currentCategory == "New"){
             MediaScanner.scanFolders(" is_old=0 ORDER BY title", false); 
+        }else if (currentCategory == "Recent"){
+            MediaScanner.scanFolders(`recent_play  BETWEEN strftime('%s', 'now', '-2 days') 
+                                                   AND strftime('%s', 'now') 
+                                                   ORDER BY recent_play DESC`
+                                    , false);
         }
     }
 
@@ -221,44 +226,8 @@ Rectangle {
                         Layout.fillHeight: true
                         Layout.preferredWidth: parent.width
                         FloatingSlider {
-                            elms: ListModel {
-                                ListElement {
-                                    img: "../../../res/images/cover1.jpg"
-                                    artist: "Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                    isfav: true
-                                    songName: "Love Story Taylor Swift Taylor Swift Taylor Swift Taylor Swift"
-                                }
-                                ListElement {
-                                    img: "../../../res/images/cover2.jpg"
-                                    artist: "Ed Sheeran"
-                                    isfav: false
-                                    songName: "Shape of You"
-                                }
-                                ListElement {
-                                    img: "../../../res/images/cover4.jpg"
-                                    artist: "Adele"
-                                    isfav: true
-                                    songName: "Hello"
-                                }
-                                ListElement {
-                                    img: "../../../res/images/cover5.jpg"
-                                    artist: "Bruno Mars"
-                                    isfav: false
-                                    songName: "Uptown Funk"
-                                }
-                                ListElement {
-                                    img: "../../../res/images/cover6.jpg"
-                                    artist: "Beyoncé"
-                                    isfav: true
-                                    songName: "Halo"
-                                }
-                                ListElement {
-                                    img: "../../../res/images/defaultCover.jpg"
-                                    artist: "Unknown Artist"
-                                    isfav: false
-                                    songName: "Unknown Song"
-                                }
-                            }
+                            elms: BestSongs
+                            Component.onCompleted: BestSongs.update()
                         }
                     }
                 }
@@ -285,7 +254,7 @@ Rectangle {
                         }
                     }
                     Item {
-                        Layout.preferredHeight: ["Songs", "Favorites", "New"].find(c => root.currentCategory == c) ? 0 : 40
+                        Layout.preferredHeight: ["Songs", "Favorites", "New", "Recent"].find(c => root.currentCategory == c) ? 0 : 40
                         Layout.preferredWidth: parent.width
                         Behavior on Layout.preferredHeight {
                             NumberAnimation {
@@ -364,6 +333,9 @@ Rectangle {
                         Layout.fillHeight: true
                         Layout.preferredWidth: parent.width
                         clip: true
+                        EmptyUfo{
+                            visible :  MediaScanner.isEmpty
+                        } 
                         GridView {
                             id: musicgrid
                             anchors.fill: parent

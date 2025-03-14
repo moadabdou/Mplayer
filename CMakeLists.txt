@@ -40,6 +40,7 @@ qt_add_qml_module(appMplayer
         qml/components/cards/PlayingWindow.qml
         qml/components/cards/SongCover.qml
         qml/components/cards/SongElement.qml
+        qml/components/cards/EmptyUfo.qml
         qml/components/images/RoundedImage.qml  
         qml/components/images/RadiusImage.qml
         qml/components/sliders/FloatingSlider.qml
@@ -66,6 +67,11 @@ qt_add_qml_module(appMplayer
         res/icons/medium-volume.png
         res/icons/shuffle.png
         res/icons/exchange.png
+        res/icons/repeat-current.png
+        res/icons/shuffle-off.png
+        res/icons/open-folder.png
+        res/icons/recent.png
+        res/icons/ufo.png
         res/images/songImg.jpg
         res/images/cover1.jpg
         res/images/cover2.jpg
@@ -78,6 +84,7 @@ qt_add_qml_module(appMplayer
         include/media/MediaScanner.h src/backend/media/MediaScanner.cpp
         include/media/QueuePlaying.h src/backend/media/QueuePlaying.cpp
         include/media/PlayController.h src/backend/media/PlayController.cpp
+        include/media/BestSongs.h src/backend/media/BestSongs.cpp
         include/db/update_db.h src/backend/db/update_db.cpp
         include/db/fetch_db.h src/backend/db/fetch_db.cpp
         include/db/SongDatabase.h src/backend/db/SongDatabase.cpp

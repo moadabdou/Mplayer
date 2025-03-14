@@ -4,8 +4,10 @@
 #include <QTimer>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QMediaDevices>
 #include "media/MediaScanner.h"
 #include "media/QueuePlaying.h"
+#include "db/SongDatabase.h"
 
 class PlayController: public QObject{
     Q_OBJECT
@@ -24,8 +26,16 @@ class PlayController: public QObject{
     Q_PROPERTY(bool isPlaying READ isPlaying WRITE setIsPlaying NOTIFY isPlayingChanged);
     Q_PROPERTY(bool isShown READ isShown WRITE setIsShown NOTIFY isShownChanged);
 
+
+    enum RepeatMode{
+        NOREPEAT = 0,
+        REPEAT,
+        REPEATCURR,
+        SHUFFLE
+    };
+
 public: 
-    explicit PlayController(MediaScanner* ScannedSongs, QueuePlaying* QueuedSongs, QObject *parent = nullptr);
+    explicit PlayController(MediaScanner* ScannedSongs, QueuePlaying* QueuedSongs, SongDatabase* songDB, QObject *parent = nullptr);
 
 
     Q_INVOKABLE void next() const;
@@ -77,14 +87,17 @@ public slots:
     void updatePosition();
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void handleAudioOutputsChanged();
 
 private:
 
     MediaScanner* scannedSongs;
     QueuePlaying* queuedSongs;
+    SongDatabase* songDB;
 
     QString songPath;
     QAudioOutput *audioOutput;
+    QMediaDevices *devices;
     QMediaPlayer *player;
 
     QTimer timer;

@@ -5,7 +5,7 @@
 #include "shared/types/song.h"
 
 
-void fectchSongs(std::vector<Song>& songs, std::fstream& dblogs, const QString& conditions = "1");
+void fectchSongs(std::vector<Song>& songs, const QString& conditions = "1");
 
 
 

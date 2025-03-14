@@ -166,6 +166,10 @@ Item{
                                     icon : "../../../res/icons/audiowave.png"
                                 }
                                 ListElement{
+                                    txt : "Recent"
+                                    icon : "../../../res/icons/recent.png"
+                                }
+                                ListElement{
                                     txt : "Favorites"
                                     icon : "../../../res/icons/heart.png"
                                 }
@@ -179,7 +183,7 @@ Item{
                                 }
                                 ListElement{
                                     txt : "Folders"
-                                    icon : "../../../res/icons/music-album.png"
+                                    icon : "../../../res/icons/open-folder.png"
                                 }
                                 ListElement{
                                     txt : "New"

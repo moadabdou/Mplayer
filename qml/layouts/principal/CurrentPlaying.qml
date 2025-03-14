@@ -131,6 +131,10 @@ Rectangle{
                     
                     Layout.bottomMargin : 15
 
+                    EmptyUfo{
+                        visible :  QueuePlaying.currentlyPlaying == -1
+                    } 
+
                     Item{
                         width : parent.width * root.contentAspect 
                         height : parent.height

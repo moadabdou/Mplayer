@@ -1,4 +1,5 @@
 #ifndef UPDATE_DB_H
 #define UPDATE_DB_H
-void updateDatabase(const QString&  folderPath);
+#include <vector>
+void updateDatabase(const std::vector<QString>&  folderPath);
 #endif //UPDATE_DB_H

@@ -2,12 +2,11 @@
 #include <filesystem>
 #include "db/fetch_db.h"
 
-void fectchSongs(std::vector<Song>& songs, std::fstream& dblogs, const QString& conditions ){ 
+void fectchSongs(std::vector<Song>& songs, const QString& conditions ){ 
     const std::string dbPath = std::filesystem::current_path().string() + "/data/songs.db";
     sqlite3 *db;
     
     if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
-        //dblogs << "Error opening database: " << sqlite3_errmsg(db);
         return;
     }
 

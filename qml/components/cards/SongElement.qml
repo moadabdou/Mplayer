@@ -117,7 +117,7 @@ Rectangle{
                                 }
                             }
                             onTriggered : ()=>{
-                                QueuePlaying.playSong(root.filePath , root.songName , root.artist, "" , root.duration, root.img, root.isFav)
+                                QueuePlaying.playSong(root.filePath , root.songName , root.artist, root.album , root.duration, root.img, root.isFav)
                             }
                         }
                         MenuItem { 

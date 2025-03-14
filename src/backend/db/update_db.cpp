@@ -1,6 +1,5 @@
 #include <sqlite3.h>
 #include <string>
-#include <vector>
 #include <filesystem>
 #include <fstream>
 #include <QDir> 
@@ -179,7 +178,7 @@ void deleteRemovedSongs(sqlite3* db, size_t scantime, std::fstream& dblogs) {
 }
 
 
-void updateDatabase(const QString&  folderPath) {
+void updateDatabase(const std::vector<QString>&  folderPaths) {
 
     
     std::fstream logSongs(std::filesystem::current_path().string() + "/logs/songsScan.log", std::ios::out);
@@ -206,7 +205,8 @@ void updateDatabase(const QString&  folderPath) {
             is_fav INTEGER DEFAULT 0,  -- 0 = not favorite, 1 = favorite
             play_count INTEGER DEFAULT 0, -- Number of times played
             is_old INTEGER DEFAULT 0,  
-            last_time_scanned INTEGER  -- Unix timestamp of the last scan
+            last_time_scanned INTEGER, -- Unix timestamp of the last scan
+            recent_play  INTEGER DEFAULT 0 -- Unix timestamp of the last play
         );
     )";
     
@@ -216,18 +216,24 @@ void updateDatabase(const QString&  folderPath) {
         return;
     }
 
-    QDir directory(folderPath);
     QStringList filters = { "*.mp3"};
-    QStringList fileList = directory.entryList(filters, QDir::Files);
-    
     std::vector<Song> newSongs;
     std::vector<QString>  oldSongs;
     size_t scantime = QDateTime::currentSecsSinceEpoch();
 
+    std::vector<std::pair<QString, QString>> files;
+    for (const QString& folderPath : folderPaths) {
+        QDir directory(folderPath);
+        QStringList fileList = directory.entryList(filters, QDir::Files);
+        for (const QString& file : fileList) {
+            files.push_back({folderPath, file});
+        }
+    }
 
-    for (const QString& file : fileList) {
-        QString filePath = folderPath + "/" + file;
 
+    for (const auto& filePair : files) {
+        QString filePath = filePair.first + "/" + filePair.second;
+        QString file = filePair.second;
 
         bool isSongExists = isSongExist(db, filePath.toStdString().c_str() , logdb);
 

@@ -6,7 +6,7 @@ Item {
     anchors.fill: parent
     clip: true
     focus: true
-    required property ListModel elms
+    required property AbstractListModel elms
 
     PathView {
         anchors.fill: parent
@@ -113,10 +113,13 @@ Item {
 
             required property int index
             property real rotX: PathView.itemAngle
-            required property string img 
-            required property bool isfav
+            required property string filePath
+            required property string coverImage
             required property string artist
-            required property string songName 
+            required property string album
+            required property string duration
+            required property string title
+            required property bool isFav 
 
             visible: PathView.onPath
             clip : true
@@ -141,11 +144,14 @@ Item {
             }
 
             SongCover{
-                songName : wrapper.songName
-                img :wrapper.img
+                title : wrapper.title
+                coverImage :wrapper.coverImage
                 artist : wrapper.artist 
-                isfav: wrapper.isfav
-            }
+                isFav: wrapper.isFav 
+                filePath :  wrapper.filePath
+                album: wrapper.album
+                duration : wrapper.duration
+            } 
         }
     }
 }

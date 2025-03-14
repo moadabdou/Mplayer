@@ -153,9 +153,6 @@ int QueuePlaying::currentlyPlaying() const
 
 void QueuePlaying::setCurrentlyPlaying(int index)
 {
-    if (m_currentlyPlaying == index)
-        return;
-
     m_currentlyPlaying = index;
     emit currentlyPlayingChanged();
 }
