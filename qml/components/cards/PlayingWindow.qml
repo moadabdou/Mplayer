@@ -5,7 +5,23 @@ import  Mplayer 1.0
 
 Rectangle{
     id : root
-    required property string songimg
+    property string coverImage : "../../../res/images/cover5.jpg";
+    property string title : "No Songs in Queue";
+    property string artist  : "select a song";
+    property string album : "from album";
+
+    Connections{
+        target: QueuePlaying
+        function onCurrentlyPlayingChanged() {
+            let song = QueuePlaying.getCurrentSong();
+            root.coverImage = song.coverImage
+            root.artist = song.artist 
+            root.title = song.title 
+            root.album = song.album
+            console.log(song.album)
+        }
+    }
+    
 
     height : parent.height 
     width : parent.width 
@@ -44,7 +60,7 @@ Rectangle{
 
 
         ColumnLayout{
-            width : parent.width * 0.7
+            width : parent.width * 0.9
             height : parent.height * 0.85
             anchors.centerIn :parent
             Item{
@@ -70,9 +86,12 @@ Rectangle{
                     anchors.centerIn: parent
                 }
                 
-                RoundedImage{
-                    img : root.songimg 
+                RadiusImage{
+                    img : root.coverImage
                     anchors.centerIn : parent
+                    _radius : 20
+                    _width : parent.width*.6
+                    _height : parent.height*.9
                 }
 
             }
@@ -82,27 +101,45 @@ Rectangle{
 
                 Column{
                     anchors.fill : parent
-                    Text{
-                        text :  "GALAXY"
-                        height :  30
-                        anchors.horizontalCenter : parent.horizontalCenter
-                        font{
-                            family:"Impact, fantasy"
-                            pixelSize :  16
-                            bold : true
+                    Item {
+                        id : titleContainer
+                        width: parent.width *.8
+                        height: 30
+                        anchors.horizontalCenter :  parent.horizontalCenter
+                        clip : true
+                        Text {
+                            id: scrollingText
+                            text: root.title
+                            color: "white"
+                            x: titleContainer.width  // Start off-screen on the right
+
+                            font{
+                                family:"Impact, fantasy"
+                                pixelSize :  16
+                                bold : true
+                            }
+
+                            NumberAnimation on x {
+                                id: anim
+                                from: titleContainer.width
+                                to: -scrollingText.width
+                                duration: Math.max(4000, scrollingText.width * 20)
+                                loops: Animation.Infinite
+                            }
+                            onTextChanged : anim.restart()
+                            Component.onCompleted: anim.start()
                         }
-                        color :  "#fff"
                     }
                     Row{
                         height :  30 
                         width : parent.width
                         
                         DotText{
-                            txt : "Travis Scott wo47473847398798"
+                            txt : root.artist
                         }
 
                         DotText{
-                            txt : "Best of 2020 493746394364"
+                            txt : root.album
                         }
                     }
                 }

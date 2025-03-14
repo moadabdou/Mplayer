@@ -304,7 +304,7 @@ Rectangle {
                             spacing: 10
                             clip: true  // Prevents overflow
 
-                            model: SongDB.fetchCategoryItems(root.currentCategory)
+                            model: SongDatabase.fetchCategoryItems(root.currentCategory)
                             
                             currentCategoryItem: model.length > 0 ? model[0] : ""
                             onModelChanged: currentCategoryItem = model.length > 0 ? model[0] : ""
@@ -320,7 +320,7 @@ Rectangle {
                                     width: children[0].implicitWidth + 20
                                     height: parent.height
                                     radius: 10  // Rounded corners
-                                    color: categoryList.currentIndex == categoryElm.index ? "#ca0091" : "#30003b"
+                                    color: categoryList.currentIndex == categoryElm.index ? "#EF4369" : "#30003b"
 
                                     // Add hover behavior
                                     Behavior on color {
@@ -360,6 +360,7 @@ Rectangle {
                         }
                     }
                     Item {
+                        id :  gridContainer
                         Layout.fillHeight: true
                         Layout.preferredWidth: parent.width
                         clip: true
@@ -380,10 +381,12 @@ Rectangle {
                                 required property string filePath
                                 required property string coverImage
                                 required property string artist
+                                required property string album
+                                required property string duration
                                 required property string title
                                 required property bool isFav
 
-                                width: parent.width / 2 - 10
+                                width: gridContainer.width / 2 - 10
                                 height: 70
                                 radius: 10
 
@@ -393,6 +396,8 @@ Rectangle {
                                     img: elm.coverImage
                                     artist: elm.artist
                                     songName: elm.title
+                                    duration : elm.duration
+                                    album : elm.album
                                     isFav: elm.isFav
                                     filePath: elm.filePath
                                 }

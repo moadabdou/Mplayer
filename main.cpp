@@ -2,19 +2,29 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "media/MediaScanner.h"
-#include "db/Song_db.h"
-
+#include "media/QueuePlaying.h"
+#include "media/PlayController.h"
+#include "db/SongDatabase.h"
+  
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
     MediaScanner media_scanner;
-    SongDatabase songdb;
+    QueuePlaying queuePalying;
+    SongDatabase songDatabase;
+    PlayController controller(&media_scanner, &queuePalying);
+    
+    QObject::connect(&queuePalying, &QueuePlaying::currentlyPlayingChanged,
+                     &controller, &PlayController::newSongToPlay);
+
     engine.rootContext()->setContextProperty("MediaScanner", &media_scanner);
-    engine.rootContext()->setContextProperty("SongDB", &songdb);
+    engine.rootContext()->setContextProperty("QueuePlaying", &queuePalying);
+    engine.rootContext()->setContextProperty("SongDatabase", &songDatabase);
+    engine.rootContext()->setContextProperty("PlayController", &controller);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-                     &app, []() { QCoreApplication::exit(-1); },
+                     &app, []()->void { QCoreApplication::exit(-1); },
     Qt::QueuedConnection);
     engine.loadFromModule("Mplayer", "Main");
 

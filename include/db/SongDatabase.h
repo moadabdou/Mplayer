@@ -3,6 +3,8 @@
 #include <fstream>
 #include <QObject>
 #include <sqlite3.h>
+#include <QString>
+#include <QtQml/qqmlregistration.h>
 
 class SongDatabase : public QObject {
     Q_OBJECT

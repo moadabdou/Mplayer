@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Taglib REQUIRED)
 find_package(SQLite3 REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Quick Core)
+find_package(Qt6 REQUIRED COMPONENTS Quick Core Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -61,6 +61,7 @@ qt_add_qml_module(appMplayer
         res/icons/dots.png
         res/icons/next.png
         res/icons/pause.png
+        res/icons/play.png
         res/icons/previous.png
         res/icons/medium-volume.png
         res/icons/shuffle.png
@@ -75,9 +76,11 @@ qt_add_qml_module(appMplayer
         res/images/wavesong.png
     SOURCES 
         include/media/MediaScanner.h src/backend/media/MediaScanner.cpp
+        include/media/QueuePlaying.h src/backend/media/QueuePlaying.cpp
+        include/media/PlayController.h src/backend/media/PlayController.cpp
         include/db/update_db.h src/backend/db/update_db.cpp
         include/db/fetch_db.h src/backend/db/fetch_db.cpp
-        include/db/Song_db.h src/backend/db/Song_db.cpp
+        include/db/SongDatabase.h src/backend/db/SongDatabase.cpp
         include/shared/types/song.h
 )
 
@@ -93,7 +96,7 @@ set_target_properties(appMplayer PROPERTIES
 )
 
 target_link_libraries(appMplayer
-    PRIVATE Qt6::Quick Qt6::Core tag  SQLite::SQLite3
+    PRIVATE Qt6::Quick Qt6::Core tag Qt6::Multimedia SQLite::SQLite3
 )  
 
 

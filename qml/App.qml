@@ -43,7 +43,7 @@ Item {
         hoverEnabled: true
 
         onEntered: {
-            player.anchors.bottomMargin = 0;
+            PlayController.isShown = true;
         }
     }
 
@@ -52,14 +52,12 @@ Item {
         anchors.bottom : parent.bottom
         width : parent.width
         inner :  innerContent  
-        anchors.bottomMargin :  -60
+        anchors.bottomMargin :  PlayController.isShown && PlayController.songTitle ? 0 : -70
         Behavior on anchors.bottomMargin{
             NumberAnimation{
                 duration : 300
             }
         }
-        
-
     }
 
 

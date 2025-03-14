@@ -11,7 +11,7 @@ void fectchSongs(std::vector<Song>& songs, std::fstream& dblogs, const QString& 
         return;
     }
 
-    QString sql = QString("SELECT path, title, artist, album, songCover, is_fav, play_count FROM songs WHERE %1;").arg(conditions);
+    QString sql = QString("SELECT path, title, artist, album, duration, songCover, is_fav, play_count FROM songs WHERE %1;").arg(conditions);
     sqlite3_stmt *stmt;
 
     if (sqlite3_prepare_v2(db, sql.toStdString().c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
@@ -21,8 +21,9 @@ void fectchSongs(std::vector<Song>& songs, std::fstream& dblogs, const QString& 
             song.title = QString((const char*)sqlite3_column_text(stmt, 1));
             song.artist = QString((const char*)sqlite3_column_text(stmt, 2));
             song.album = QString((const char*)sqlite3_column_text(stmt, 3));
-            song.coverImage = QString((const char*)sqlite3_column_text(stmt, 4));
-            song.isFav = sqlite3_column_int(stmt, 5) != 0;
+            song.duration = QString((const char*)sqlite3_column_text(stmt, 4));
+            song.coverImage = QString((const char*)sqlite3_column_text(stmt, 5));
+            song.isFav = sqlite3_column_int(stmt, 6) != 0;
             
             songs.push_back(song);
         }

@@ -22,8 +22,9 @@ QVariant MediaScanner::data(const QModelIndex& index, int role) const {
         case TitleRole: return song.title;
         case ArtistRole: return song.artist;
         case AlbumRole: return song.album;
+        case DurationRole: return song.duration;
         case CoverImageRole: return song.coverImage;
-        case IsFav : return song.isFav;
+        case IsFavRole : return song.isFav;
     }
     return QVariant();
 }
@@ -34,8 +35,9 @@ QHash<int, QByteArray> MediaScanner::roleNames() const {
         { TitleRole, "title" },
         { ArtistRole, "artist" },
         { AlbumRole, "album" },
+        { DurationRole, "duration"},
         { CoverImageRole, "coverImage" },
-        { IsFav , "isFav" }
+        { IsFavRole , "isFav" }
     };
 }
 
@@ -48,9 +50,6 @@ void MediaScanner::scanFolders(const QString& query, bool update ) {
 
     std::fstream logdb(std::filesystem::current_path().string() + "/logs/dbtransactions_fetch.log", std::ios::out);
     fectchSongs(songs, logdb, query);
-    for(const auto& el :  songs){
-        //logdb << "img : " << el.coverImage.toStdString() << "\n";
-    }
 
     endResetModel();
 }

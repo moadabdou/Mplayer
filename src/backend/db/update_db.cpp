@@ -6,6 +6,8 @@
 #include <QDir> 
 #include <QDebug>
 #include <QRandomGenerator>
+#include <QMediaPlayer>
+#include <QEventLoop>
 #include <taglib/fileref.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -14,6 +16,24 @@
 #include <taglib/attachedpictureframe.h>
 #include "shared/types/song.h"
 
+int getAudioDuration(const std::string &filePath) {
+    std::string command = "ffprobe -i \"" + filePath + "\" -show_entries format=duration -v quiet -of csv=\"p=0\"";
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) return -1;
+
+    char buffer[128];
+    std::string result = "";
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        result += buffer;
+    }
+    pclose(pipe);
+
+    try {
+        return static_cast<int>(std::stod(result)); // Convert to integer seconds
+    } catch (...) {
+        return -1; // Failed to parse
+    }
+}
 
 bool isSongExist(sqlite3* db, const char *path, std::fstream& dblogs){
     const char *sql = "SELECT COUNT(*) FROM songs WHERE path = ?;";
@@ -34,18 +54,30 @@ bool isSongExist(sqlite3* db, const char *path, std::fstream& dblogs){
     sqlite3_finalize(stmt);
     return exists;
 }
-void updateLastScanTime(sqlite3* db,const QString& path,size_t time, std::fstream& dblogs) {
-    const char *sql = "UPDATE songs SET last_time_scanned = ?, is_old=1 WHERE path = ?;";
-    sqlite3_stmt *stmt;
+void updateLastScanTime(sqlite3* db, const std::vector<QString>& songPaths, size_t time, std::fstream& dblogs) {
+    std::string sql = "UPDATE songs SET last_time_scanned = ?, is_old = 1 WHERE path IN (";
+    for (size_t i = 0; i < songPaths.size(); i++) {
+        sql += "?";
+        if (i < songPaths.size() - 1) {
+            sql += ",";
+        }
+    }
+    sql += ");";
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        // Bind the timestamp first
         sqlite3_bind_int64(stmt, 1, time);
-        sqlite3_bind_text(stmt, 2, path.toStdString().c_str(), -1, SQLITE_STATIC);
+        
+        // Bind all paths
+        for (size_t i = 0; i < songPaths.size(); i++) {
+            sqlite3_bind_text(stmt, i + 2, songPaths[i].toStdString().c_str(), -1, SQLITE_TRANSIENT);
+        }
         
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             dblogs << "Error updating last scan time: " << sqlite3_errmsg(db) << std::endl;
         }
-    }else {
+    } else {
         dblogs << "Error preparing in last scan time: " << sqlite3_errmsg(db) << std::endl;
     }
 
@@ -54,11 +86,11 @@ void updateLastScanTime(sqlite3* db,const QString& path,size_t time, std::fstrea
 
 
 bool registerNewSongs(sqlite3* db,std::vector<Song> songs ,size_t scantime, std::fstream& dblogs) {
-    std::string sql = "INSERT INTO songs (path, title, artist, album, songCover, last_time_scanned) VALUES ";
+    std::string sql = "INSERT INTO songs (path, title, artist, album,duration,songCover, last_time_scanned) VALUES ";
     
     // Build the query with multiple value sets
     for (size_t i = 0; i < songs.size(); i++) {
-        sql += "(?, ?, ?, ?, ?, ?)";
+        sql += "(?, ?, ?, ?, ?, ?, ?)";
         if (i < songs.size() - 1) {
             sql += ",";
         }
@@ -75,6 +107,7 @@ bool registerNewSongs(sqlite3* db,std::vector<Song> songs ,size_t scantime, std:
             sqlite3_bind_text(stmt, bindIndex++, song.title.toStdString().c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(stmt, bindIndex++, song.artist.toStdString().c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(stmt, bindIndex++, song.album.toStdString().c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(stmt, bindIndex++, song.duration.toStdString().c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_text(stmt, bindIndex++, song.coverImage.toStdString().c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_int64(stmt, bindIndex++, scantime);
         }
@@ -148,6 +181,11 @@ void deleteRemovedSongs(sqlite3* db, size_t scantime, std::fstream& dblogs) {
 
 void updateDatabase(const QString&  folderPath) {
 
+    
+    std::fstream logSongs(std::filesystem::current_path().string() + "/logs/songsScan.log", std::ios::out);
+    std::fstream logdb(std::filesystem::current_path().string() + "/logs/dbtransactions.log", std::ios::out);
+    
+
     const std::string dbPath = std::filesystem::current_path().string() + "/data/songs.db";
     sqlite3 *db;
 
@@ -164,6 +202,7 @@ void updateDatabase(const QString&  folderPath) {
             album TEXT NOT NULL,                -- Album name
             artist TEXT NOT NULL,               -- Artist name
             songCover TEXT NOT NULL,            -- cover image
+            duration TEXT NOT NULL,
             is_fav INTEGER DEFAULT 0,  -- 0 = not favorite, 1 = favorite
             play_count INTEGER DEFAULT 0, -- Number of times played
             is_old INTEGER DEFAULT 0,  
@@ -180,12 +219,9 @@ void updateDatabase(const QString&  folderPath) {
     QDir directory(folderPath);
     QStringList filters = { "*.mp3"};
     QStringList fileList = directory.entryList(filters, QDir::Files);
-
-    std::fstream logSongs(std::filesystem::current_path().string() + "/logs/songsScan.log", std::ios::out);
-    std::fstream logdb(std::filesystem::current_path().string() + "/logs/dbtransactions.log", std::ios::out);
-    
     
     std::vector<Song> newSongs;
+    std::vector<QString>  oldSongs;
     size_t scantime = QDateTime::currentSecsSinceEpoch();
 
 
@@ -195,11 +231,16 @@ void updateDatabase(const QString&  folderPath) {
 
         bool isSongExists = isSongExist(db, filePath.toStdString().c_str() , logdb);
 
-        // Open file with TagLib
-        TagLib::FileRef f(filePath.toStdString().c_str());
+        // Open file with TagLib using wide string for Unicode support
+        #ifdef _WIN32
+            TagLib::FileRef f(filePath.toStdWString().c_str());
+        #else
+            TagLib::FileRef f(filePath.toStdString().c_str());
+        #endif
         QString title = file;
         QString artist = "Unknown Artist";
         QString album = "Unknown Album";
+        QString duration = "0:00";
         QString coverImage = "../../../res/images/defaultCover.jpg";
 
         if (!f.isNull() && f.tag()) {
@@ -207,6 +248,20 @@ void updateDatabase(const QString&  folderPath) {
             title = !tag->title().isEmpty()? QString::fromStdString(tag->title().to8Bit(true)):title;
             artist = !tag->artist().isEmpty()? QString::fromStdString(tag->artist().to8Bit(true)):artist;
             album =  !tag->album().isEmpty()? QString::fromStdString(tag->album().to8Bit(true)):album;
+            
+            size_t totalSeconds = 0;
+            if (f.audioProperties() && f.audioProperties()->lengthInSeconds() > 0) {
+                totalSeconds = f.audioProperties()->lengthInSeconds();
+            }
+
+            size_t hours = totalSeconds / 3600;
+            size_t minutes = (totalSeconds % 3600) / 60;
+            size_t seconds = totalSeconds % 60;
+            duration = (hours > 0 ? QString("%1:").arg(hours) : "") +
+                      QString("%1:%2")
+                          .arg(minutes, hours > 0 ? 2 : 1, 10, QChar('0'))
+                          .arg(seconds, 2, 10, QChar('0'));
+
             if (!isSongExists){ //retrieve  image only  if the song is new 
                 TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File*>(f.file());
                 std::vector<TagLib::ByteVector> pictures;
@@ -220,7 +275,7 @@ void updateDatabase(const QString&  folderPath) {
                 if (!pictures.empty()) {
                     TagLib::ByteVector coverArt = pictures[0];
                     QString coverFileName = QString::number(QRandomGenerator::global()->generate()) + ".jpg";
-                    QString coverPath = QString::fromStdString(std::filesystem::current_path().string()) + "\\data\\covers\\" + coverFileName;
+                    QString coverPath =  QString::fromStdString(std::filesystem::current_path().string()) + "\\data\\covers\\" + coverFileName;
                     
                     // Create covers directory if it doesn't exist
                     QDir().mkpath(QString::fromStdString(std::filesystem::current_path().string()) + "\\data\\covers");
@@ -231,25 +286,22 @@ void updateDatabase(const QString&  folderPath) {
                     if (file.open(QIODevice::WriteOnly)) {
                         file.write(imageData);
                         file.close();
-                        coverImage = coverPath; // Update coverImage path for database
+                        coverImage = "file:///" + coverPath; // Update coverImage path for database
                     }
                 }
             }
         }
 
-        if (!coverImage.endsWith("defaultCover.jpg")){
-            coverImage = "file:///" + coverImage;
-        }
-
-        logSongs << "path : " << filePath.toStdString().c_str() << "\n" 
-            << "title: " << title.toStdString().c_str()    << "\n"
-            << "artist: " << artist.toStdString().c_str()    << "\n"
-            << "album: " << album.toStdString().c_str()    << "\n"
-            << "cover: " << coverImage.toStdString().c_str() <<"\n";
+        logSongs << "path : " << filePath.toStdString() << "\n" 
+            << "title: " << title.toStdString()    << "\n"
+            << "artist: " << artist.toStdString()    << "\n"
+            << "album: " << album.toStdString()    << "\n"
+            << "duration: " << duration.toStdString() << "\n"
+            << "cover: " << coverImage.toStdString() <<"\n";
         
-
+  
         if (isSongExists){
-            updateLastScanTime(db, filePath , scantime, logdb);
+            oldSongs.push_back(filePath);
             logSongs << "exists !\n";
             // if (isSongMetaDataChanged(db, filePath, title, artist, album, logdb)){
             //     logSongs << "exists but changed!\n" ; 
@@ -262,6 +314,7 @@ void updateDatabase(const QString&  folderPath) {
                 .title = title ,
                 .artist = artist,
                 .album = album, 
+                .duration = duration,
                 .coverImage = coverImage,
                 .isFav = 0
             });
@@ -274,6 +327,9 @@ void updateDatabase(const QString&  folderPath) {
 
     if (newSongs.size()){    
         bool res = registerNewSongs(db, newSongs, scantime,  logdb);
+    }
+    if (oldSongs.size()){
+        updateLastScanTime(db, oldSongs , scantime, logdb);
     }
     deleteRemovedSongs(db, scantime, logdb);
 

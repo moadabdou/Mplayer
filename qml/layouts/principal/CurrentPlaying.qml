@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects 
 import Mplayer 1.0
 
 
@@ -74,7 +73,7 @@ Rectangle{
 
 
             Layout.preferredWidth :  parent.width
-            Layout.preferredHeight : 290
+            Layout.preferredHeight : 290;
 
             clip : true
 
@@ -90,9 +89,7 @@ Rectangle{
                 Item{
                     Layout.preferredWidth :  parent.width
                     Layout.fillHeight : true
-                    PlayingWindow{
-                        songimg : "../../../res/images/songImg.jpg"
-                    } 
+                    PlayingWindow{} 
                 }
             }
         }
@@ -117,7 +114,7 @@ Rectangle{
                         spacing : 10
                         anchors.verticalCenter :  parent.verticalCenter
                         TextIcon{ 
-                            txt :  "Next Songs"
+                            txt :  "Queue"
                         }
                         Item{
                             Layout.fillWidth : true
@@ -133,69 +130,28 @@ Rectangle{
                     clip : true
                     
                     Layout.bottomMargin : 15
-                    ListModel{
-                        id : songs
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023 483 347347834346"
-                            duration : "03:15"
-                            songName : "Galaxy hhhhhhhhhhhhhhhhhhhh"
-                        }
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023"
-                            duration : "03:15"
-                            songName : "Galaxy"
-                        }
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023"
-                            duration : "03:15"
-                            songName : "Galaxy"
-                        }
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023"
-                            duration : "03:15"
-                            songName : "Galaxy"
-                        }
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023"
-                            duration : "03:15"
-                            songName : "Galaxy"
-                        }
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023"
-                            duration : "03:15"
-                            songName : "Galaxy"
-                        }
-                        ListElement{
-                            img : "../../../res/images/songImg.jpg"
-                            artist  : "Travis Scott-2023"
-                            duration : "03:15"
-                            songName : "Galaxy"
-                        }
-                    }
 
                     Item{
                         width : parent.width * root.contentAspect 
                         height : parent.height
                         anchors.horizontalCenter : parent.horizontalCenter
+                        
                         ListView{
                             id : songlistview
                             anchors.fill : parent
-                            model: songs
-                            snapMode: ListView.SnapToItem // This snaps to the nearest item
-                            spacing :  10
+                            model: QueuePlaying
+                            snapMode: ListView.SnapToItem
+                            spacing : 10
+                            currentIndex : QueuePlaying.currentlyPlaying
+
                             delegate: Rectangle{
                                 id : listElement
-                                required property string img 
-                                required property string artist 
-                                required property string songName
                                 required property int index 
+                                required property string filePath 
+                                required property string artist 
+                                required property string title
                                 required property string duration
+                                required property string coverImage
                                 
                                 
                                 width: ListView.view.width
@@ -216,11 +172,11 @@ Rectangle{
                                 
 
                                 Rectangle{
-                                    width :  songlistview.currentIndex == listElement.index ? parent.width   : parent.width - 2
-                                    height:  songlistview.currentIndex == listElement.index ? parent.height   : parent.height - 2
+                                    width :  songlistview.currentIndex  == listElement.index ? parent.width   : parent.width - 2
+                                    height:  songlistview.currentIndex  == listElement.index ? parent.height   : parent.height - 2
                                     anchors.centerIn : parent
                                     radius : parent.radius - 1
-                                    color :  songlistview.currentIndex == listElement.index ? "#EF4369"  : "#0D0C1B"
+                                    color :  songlistview.currentIndex  == listElement.index ? "#EF4369"  : "#0D0C1B"
                                     Behavior on  color{
                                         ColorAnimation{
                                             duration : 300
@@ -234,7 +190,7 @@ Rectangle{
                                             Layout.preferredWidth : parent.width * 2.5/12
                                             
                                             RadiusImage{
-                                                img :  listElement.img
+                                                img :  listElement.coverImage
                                                 _height : 45
                                                 _width : 45
                                                 _radius : 10
@@ -251,7 +207,7 @@ Rectangle{
                                                 width : parent.width
                                                 anchors.verticalCenter : parent.verticalCenter
                                                 Text{
-                                                    text : listElement.songName
+                                                    text : listElement.title
                                                     width : parent.width
                                                     elide: Text.ElideRight 
                                                     font{
@@ -291,28 +247,21 @@ Rectangle{
                                 }
 
 
-                                Image {
-                                    id : waveicon
-                                    source : "../../../res/icons/audiowave.png"
-                                    visible : false
-                                }
-                                MultiEffect{
-                                    source: waveicon
-                                    brightness : 1.0
-                                    colorization : 1.0 
-                                    colorizationColor :  "#EF4369"
-                                    width : 20
-                                    height: 20
+                                NormalIcon {
+                                    icon : "../../../res/icons/audiowave.png"
+                                    color : "#EF4369"
+                                    size : 40
+                                    x : -40
                                     anchors.verticalCenter : parent.verticalCenter
-                                    x : -30
-                                    visible :  songlistview.currentIndex == listElement.index
+                                    visible :  songlistview.currentIndex  == listElement.index ? true : false
                                 }
+    
 
                                 MouseArea{
                                     anchors.fill : parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        songlistview.currentIndex = listElement.index
+                                        QueuePlaying.currentlyPlaying  = listElement.index
                                     }
                                 }
 

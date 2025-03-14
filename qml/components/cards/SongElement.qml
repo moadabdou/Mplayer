@@ -9,25 +9,31 @@ Rectangle{
     required property real _height
     required property string img
     required property string filePath
-    required property string songName 
+    required property string songName
+    required property string duration  
     required property string artist
+    required property string album
     required property bool isFav
 
     width : _width 
     height : _height 
     radius : 10
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-        onEntered: root.color = Qt.darker(root.color, 1.2)
-        onExited: root.color = Qt.darker(root.color, 1 / 1.2)
-    }
 
     Behavior on color {
         ColorAnimation {
             duration :  100
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled : true
+        onClicked : {
+            QueuePlaying.playSong(root.filePath , root.songName , root.artist, root.album , root.duration, root.img, root.isFav)
+        }
+        onEntered : root.color =  Qt.darker(root.color, 1.2)
+        onExited : root.color =  Qt.darker(root.color, 1/1.2)
     }
 
     RowLayout{
@@ -110,6 +116,9 @@ Rectangle{
                                     acceptedButtons: Qt.NoButton
                                 }
                             }
+                            onTriggered : ()=>{
+                                QueuePlaying.playSong(root.filePath , root.songName , root.artist, "" , root.duration, root.img, root.isFav)
+                            }
                         }
                         MenuItem { 
                             text: root.isFav ? "remove from favorite" : "add to favorite"
@@ -124,7 +133,7 @@ Rectangle{
                             } 
                             onTriggered: ()=>{
                                 root.isFav = !root.isFav
-                                SongDB.editSong(root.filePath, "is_fav = "+ (root.isFav ? "1" : "0") )
+                                SongDatabase.editSong(root.filePath, "is_fav = "+ (root.isFav ? "1" : "0") )
                             }
 
                             Loader {
@@ -135,28 +144,11 @@ Rectangle{
                                 }
                             }
                         }
-                        MenuItem { 
-                            text: "set next" 
-                            contentItem: Text {
-                                text: parent.text
-                                color : "white" 
-                                font.pixelSize: 16
-                            }
-                            background: Rectangle {
-                                color: parent.highlighted ? "#EF4369" : "transparent" // Highlight color
-                                radius: 4
-                            } 
-                            Loader {
-                                anchors.fill: parent
-                                sourceComponent: MouseArea {
-                                    cursorShape: Qt.PointingHandCursor
-                                    acceptedButtons: Qt.NoButton
-                                }
-                            }
-                        }
+                        
                     }
                 }
             }
         }
     }
+
 }

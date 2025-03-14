@@ -8,6 +8,7 @@ struct Song {
     QString title;
     QString artist;
     QString album;
+    QString duration;
     QString coverImage;  // Path to the cover image
     bool isFav;  
 };

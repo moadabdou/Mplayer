@@ -5,7 +5,7 @@ import QtQuick.Layouts
 Item {
     required property Item inner
     id: root
-    height: 60
+    height: 65
     ShaderEffectSource {
         id: effectSource
         anchors.fill: parent
@@ -60,7 +60,7 @@ Item {
         preventStealing: true  // Prevents flicking from being stolen by ListView
         onWheel: (event) => event.accepted = true  // Block scroll events
         onExited:{
-            parent.anchors.bottomMargin = -60
+            PlayController.isShown = false;
         }
     }
 
@@ -78,7 +78,7 @@ Item {
                     Layout.preferredWidth : 40
                     
                     RadiusImage{
-                        img :  "../../../res/images/cover1.jpg"
+                        img :  PlayController.songCover
                         _height : parent.width
                         _width : parent.width
                         _radius : 10
@@ -88,23 +88,42 @@ Item {
 
                 Item{
                     Layout.preferredHeight: parent.height
-                    Layout.preferredWidth : 60
+                    Layout.preferredWidth : 200
                     
                     Column{
                         spacing :  4
                         width : parent.width
                         anchors.verticalCenter : parent.verticalCenter
-                        Text{
-                            text : "Galaxy"
-                            elide: Text.ElideRight 
-                            font{
-                                bold:true
-                                pointSize : 12
+                        Item {
+                            id : titleContainer
+                            width: parent.width
+                            height: 20
+                            clip : true
+                            Text {
+                                id: scrollingText
+                                text: PlayController.songTitle
+                                color: "white"
+                                x: titleContainer.width  // Start off-screen on the right
+
+                                font{
+                                    family:"Impact, fantasy"
+                                    pixelSize :  14
+                                    bold : true
+                                }
+
+                                NumberAnimation on x {
+                                    id: anim
+                                    from: titleContainer.width
+                                    to: -scrollingText.width
+                                    duration: Math.max(4500, scrollingText.width * 20)
+                                    loops: Animation.Infinite
+                                }
+                                onTextChanged : anim.restart()
+                                Component.onCompleted: anim.start()
                             }
-                            color : "#FFF"
                         }
                         Text{
-                            text : "John Doe"
+                            text : PlayController.songArtist
                             elide: Text.ElideRight 
                             font{
                                 pointSize : 9
@@ -133,6 +152,9 @@ Item {
                     MouseArea{
                         anchors.fill : parent
                         cursorShape : Qt.PointingHandCursor
+                        onClicked : {
+                            PlayController.prev();
+                        }
                     }
                 }
                 Rectangle{
@@ -142,13 +164,17 @@ Item {
                     color: "#EF4369"
                     NormalIcon{
                         anchors.centerIn : parent
-                        icon : "../../../res/icons/pause.png"
+                        icon :  PlayController.isPlaying ? "../../../res/icons/pause.png":"../../../res/icons/play.png"
                         size : 30
+                        anchors.horizontalCenterOffset : PlayController.isPlaying ? 0 : 2
                         color : "#0D0C1B"
                     }
                     MouseArea{
                         anchors.fill : parent
                         cursorShape : Qt.PointingHandCursor
+                        onClicked: {
+                            PlayController.isPlaying ? PlayController.pause() : PlayController.play()
+                        }
                     }
                 }
                 NormalIcon{
@@ -159,6 +185,9 @@ Item {
                     MouseArea{
                         anchors.fill : parent
                         cursorShape : Qt.PointingHandCursor
+                        onClicked : {
+                            PlayController.next();
+                        }
                     }
                 }
             }
@@ -172,27 +201,35 @@ Item {
                 anchors.centerIn : parent 
                 spacing : 10
                 Text{
-                    text : "00:30"
+                    text : PlayController.songPassedDuration
                     color : "white"
                 }
                 Rectangle{
                     Layout.preferredWidth : progressBar.width * .55
-                    Layout.preferredHeight : 5
+                    Layout.preferredHeight : 6
                     radius :  Layout.preferredHeight / 2
                     color : "#aaa"
                     MouseArea{
                         anchors.fill : parent
                         cursorShape : Qt.PointingHandCursor
+                        onClicked: mouse => {
+                            PlayController.seek(mouse.x / width)
+                        }
                     }
                     Rectangle{
                         height : parent.height 
-                        width : parent.width * .4
+                        width : parent.width * PlayController.songPosition
                         radius : height/2
                         color : "#EF4369"
+                        Behavior on width {
+                            NumberAnimation{
+                                duration:200
+                            }
+                        }
                     }
                 }
                 Text{
-                    text : "03:30"
+                    text : PlayController.songDuration
                     color : "white"
                 }
                 

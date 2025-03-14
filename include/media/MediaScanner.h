@@ -3,14 +3,13 @@
 
 #include <QAbstractListModel>
 #include <QString>
-#include <QPixmap>
 #include <vector>
+#include <QtQml/qqmlregistration.h>
 #include "shared/types/song.h"
 
 
 class MediaScanner : public QAbstractListModel {
     Q_OBJECT
-
 public:
     explicit MediaScanner(QObject* parent = nullptr);
     ~MediaScanner();
@@ -20,8 +19,9 @@ public:
         TitleRole,
         ArtistRole,
         AlbumRole,
+        DurationRole,
         CoverImageRole,
-        IsFav
+        IsFavRole
     };
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const ;
